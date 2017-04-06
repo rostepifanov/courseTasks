@@ -1,0 +1,128 @@
+#include <stm32f0xx.h>
+
+#include "timeControl.h"
+#include "initModule.h"
+
+void ledInit()
+//Light init
+{
+		GPIOC->MODER &= ~GPIO_MODER_MODER6;
+		GPIOC->MODER |= GPIO_MODER_MODER6_0;
+	
+		GPIOC->MODER &= ~GPIO_MODER_MODER7;
+		GPIOC->MODER |= GPIO_MODER_MODER7_0;
+	
+		GPIOC->MODER &= ~GPIO_MODER_MODER8;
+		GPIOC->MODER |= GPIO_MODER_MODER8_0;
+	
+		GPIOC->MODER &= ~GPIO_MODER_MODER9;
+		GPIOC->MODER |= GPIO_MODER_MODER9_0;
+}
+
+void buttomInit()
+//Button init
+{
+	GPIOA->MODER &= ~GPIO_MODER_MODER0;
+}
+
+void matrixInit()
+//Matrix init
+{
+	//Mode A15
+	{
+	GPIOA->MODER &= ~GPIO_MODER_MODER15;
+	GPIOA->MODER |= GPIO_MODER_MODER15_0;
+		
+	//GPIOA->OTYPER &= ~GPIO_OTYPER_OT_15;
+	}
+		
+	//Mode C12
+	{
+	GPIOC->MODER &= ~GPIO_MODER_MODER12;
+	GPIOC->MODER |= GPIO_MODER_MODER12_0;
+	
+	//GPIOC->OTYPER &= ~GPIO_OTYPER_OT_12;
+	}
+		
+	//Mode A4
+	{
+	GPIOA->MODER &= ~GPIO_MODER_MODER4;
+		
+	GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR4;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR4_1;
+	}
+		
+	//Mode A5
+	{
+	GPIOA->MODER &= ~GPIO_MODER_MODER5;
+		
+	GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR5;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR5_1;
+	}
+}
+
+void ledMatrixInit()
+{
+	//const uint8_t biteStride = 4;
+	
+	//PB13 - sck
+	{
+		GPIOB->MODER &= ~GPIO_MODER_MODER13;
+		GPIOB->MODER |= GPIO_MODER_MODER13_1;
+		GPIOB->OTYPER &= ~GPIO_OTYPER_OT_13;
+		GPIOB->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR13;
+		GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR13;
+		GPIOB->AFR[1] &= ~0xFFFFFFFF;//<<(13-8)* 4;
+	}
+	//PB15 - mosi
+	{
+		GPIOB->MODER &= ~GPIO_MODER_MODER15;
+		GPIOB->MODER |= GPIO_MODER_MODER15_1;
+		GPIOB->OTYPER &= ~ GPIO_OTYPER_OT_15;
+		GPIOB->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR15;
+		GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR15;
+		//GPIOB->AFR[1] &= ~0xF<<(15-8) * 4;
+	}
+	//PA8 - ~le
+	{
+		GPIOA->MODER &= ~GPIO_MODER_MODER8;
+		GPIOA->MODER |= GPIO_MODER_MODER8_0;
+		GPIOA->OTYPER &= ~ GPIO_OTYPER_OT_8;
+		GPIOB->OSPEEDR &= ~GPIO_OSPEEDER_OSPEEDR8;
+		GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR8;
+	}
+	//SPI Registers
+	{
+		SPI2->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | 
+								SPI_CR1_BR_0 | SPI_CR1_BR_1 | SPI_CR1_BR_2 | SPI_CR1_MSTR |
+								SPI_CR1_CPOL | SPI_CR1_CPHA;
+		
+		SPI2->CR2 = SPI_CR2_DS;
+		SPI2->CR1 |= SPI_CR1_SPE;
+	}
+}
+
+void static clockInit()
+{
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+  RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+	
+	RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+}
+
+void init(void)
+{
+	clockInit();
+	
+	ledInit();
+	
+	buttomInit();
+	
+	matrixInit();
+	
+	ledMatrixInit();
+
+	timerInit();
+
+}
