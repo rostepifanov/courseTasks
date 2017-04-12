@@ -44,6 +44,7 @@ void SysTick_Handler ()
 
 }
 
+
 void matrixTurnOnLED(uint16_t row, uint16_t col)
 {
 	GPIOA->BSRR = GPIO_BSRR_BR_8;
